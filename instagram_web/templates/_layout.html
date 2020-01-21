@@ -31,7 +31,7 @@
       </div>
       <div style="display: flex; justify-content: flex-end;">
         <a href="{{ url_for('home') }}" style="color: black; margin-left: 20px;">Home</a>
-        <a style="color: black; margin-left: 20px;">Sign In</a>
+        <a href="{{ url_for('sessions.new') }}" style="color: black; margin-left: 20px;">Sign In</a>
         <a href="{{ url_for('users.sign_up') }}" style="color: black; margin-left: 20px;">Sign Up</a>
       </div>
     </nav>
