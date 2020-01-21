@@ -3,10 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+    <link href="https://fonts.googleapis.com/css?family=Solway:400,700&display=swap" rel="stylesheet">
     <link rel="shortcut icon" href="{{ url_for('static', filename='image/favicon.ico') }}">
 
     {% assets "home_css" %}
+      
       <link rel="stylesheet" href="{{ ASSET_URL }}">
     {% endassets %}
 
@@ -19,11 +20,21 @@
 
     <title>
       {% block title %}
-      {% endblock %}NEXTAGRAM
+      {% endblock %}Nextagram
     </title>
 
   </head>
   <body>
+    <nav class="navbar navbar-light" style="background-color: #b3e6ff; display: flex">
+      <div style="display: flex; justify-content: flex-start;">
+        <a href="{{ url_for('home') }}" style="color: black">Nextagram</a>
+      </div>
+      <div style="display: flex; justify-content: flex-end;">
+        <a href="{{ url_for('home') }}" style="color: black; margin-left: 20px;">Home</a>
+        <a style="color: black; margin-left: 20px;">Sign In</a>
+        <a href="{{ url_for('users.sign_up') }}" style="color: black; margin-left: 20px;">Sign Up</a>
+      </div>
+    </nav>
     {% block content %}
     {% endblock %}
     <footer>

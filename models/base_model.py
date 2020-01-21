@@ -26,3 +26,6 @@ class BaseModel(pw.Model):
     class Meta:
         database = db
         legacy_table_names = False
+
+
+         
