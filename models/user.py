@@ -2,13 +2,12 @@ from models.base_model import BaseModel
 import peewee as pw
 import re
 from werkzeug.security import generate_password_hash # This function allows one to hash a password
+from flask_login import UserMixin # UserMixin is a class
      
-class User(BaseModel): # User is a class that inherits from another class called BaseModel
+class User(BaseModel, UserMixin): # User is a class that inherits from classes, BaseModel and UserMixin
     name = pw.CharField(unique=True)
     email = pw.CharField(unique=True)
     password = pw.CharField(unique=False)
-
-    
 
     def validate(self):
         duplicate_username = User.get_or_none(User.name == self.name)

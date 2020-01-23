@@ -14,9 +14,14 @@ app.register_blueprint(users_blueprint, url_prefix="/users")
 app.register_blueprint(sessions_blueprint)
 
 
-@app.errorhandler(500)
+@app.errorhandler(404)
 def internal_server_error(e):
-    return render_template('500.html'), 500
+    return render_template('404.html'), 404
+
+def create_app(config_filename):
+    app = Flask(__name__)
+    app.register_error_handler(404, internal_server_error)
+    return app    
 
 @app.route("/")   
 def home():

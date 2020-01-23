@@ -50,7 +50,5 @@ def signup_form():
       return redirect(url_for('users.sign_up'))
    else:    
       for i in new_user_instance.errors:
-          flash(i)  
-    #   if password != confirm_password:
-    #       flash("Passwords do not match")     
+          flash(i)     
       return render_template('users/signup.html',errors=new_user_instance.errors)   
