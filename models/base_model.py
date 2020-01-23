@@ -17,6 +17,17 @@ class BaseModel(pw.Model):
             return super(BaseModel, self).save(*args, **kwargs)
         else:
             return 0
+    
+
+    # def update(self, *args, **kwargs):
+    #     self.errors = []
+    #     # separate set of validations for update
+
+    #     if len(self.errors) == 0:
+    #         self.updated_at = datetime.datetime.now()
+    #         return super(BaseModel, self).save(*args, **kwargs)
+    #     else:
+    #         return 0
 
     def validate(self):
         print(

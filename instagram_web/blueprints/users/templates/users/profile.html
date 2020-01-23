@@ -1,0 +1,9 @@
+{% extends "_layout.html" %}
+
+{% block title %}
+  {{ current_user.name }}
+{% endblock %}
+
+{% block content %}
+    <h1>{{ current_user.name }}</h1>
+{% endblock %}

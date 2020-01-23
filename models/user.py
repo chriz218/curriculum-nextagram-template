@@ -21,13 +21,17 @@ class User(BaseModel, UserMixin): # User is a class that inherits from classes, 
         if duplicate_email:
             self.errors.append('Email address already in use')
 
-        if re.search(email_format, self.email) is None:
+        if self.email and re.search(email_format, self.email) is None:
             self.errors.append('Invalid email address')    
 
-        if len(self.password) < 8:
+        if self.password and len(self.password) < 8:
             self.errors.append('Password needs to have at least 8 characters')
+
+        if self.confirm_password != self.password:
+            self.errors.append('Passwords do not match')    
         
-        self.password = generate_password_hash(self.password)
+        if self.password:
+            self.password = generate_password_hash(self.password)
 
 
 
