@@ -19,8 +19,8 @@ def show(username):
     user = User.get_or_none(name = username)
     if current_user.is_authenticated:
         if user is not None:
-            image = user.pictures
-            return render_template('users/profile.html', user=user, image=image)
+            images = user.pictures
+            return render_template('users/profile.html', user=user, images=images)
         else: 
             flash("This user does not exist")
             return redirect(url_for('home'))   

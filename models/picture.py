@@ -7,7 +7,13 @@ from playhouse.hybrid import hybrid_property # To get the url of uploaded pictur
      
 class Picture(BaseModel): 
     picture_name = pw.CharField()
-    user = pw.ForeignKeyField(User, backref="pictures")
+    user = pw.ForeignKeyField(User, backref="pictures") # A user can have multiple pictures
+
+    def get_total_amount(self):
+        #self.payments => [payment#1, payment#4, payment#5]
+        #              => [30, 40, 100]
+        # payments backref
+        return sum([e.payment_amount for e in self.payments])
 
     # To get the url of uploaded pictures
     @hybrid_property

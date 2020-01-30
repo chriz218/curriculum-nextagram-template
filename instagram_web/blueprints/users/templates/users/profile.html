@@ -24,7 +24,7 @@
 
   <div style="display: inline-block; margin: 7px;">
     {% if user.profile_image == None %}
-      <img src="https://i.pinimg.com/originals/39/e3/6f/39e36fea0078e167237d5b1dfe1c0d59.jpg" id="profilePic">
+      <img src="https://firstbucketnext.s3.amazonaws.com/1580395073.538688SampleNSymbol.jpg" id="profilePic">
     {% else %}
       <img src="{{user.profile_image_url}}" id="profilePic">  
     {% endif %}  
@@ -37,10 +37,13 @@
     {% endif %}
   </div>
   <div style="display: flex; flex-wrap: wrap;">
-    {% for image in image %}
+    {% for image in images %}
     <div>
       <img src="{{image.picture_url}}" id="userPic">
-      <form><button class="btn btn-primary" style="display: flex; margin-left: auto; margin-right: auto">Donate</button></form>
+      {% if user != current_user %}
+      <form action="{{ url_for('payment.client_token', picture_id=image.id) }}" method="POST"><button class="btn btn-primary" style="display: flex; margin-left: auto; margin-right: auto">Donate</button></form>
+      {% endif %}
+      <p style="text-align: center;">Made ${{image.get_total_amount()}}</p>
     </div>  
     {% endfor %}  
   </div>

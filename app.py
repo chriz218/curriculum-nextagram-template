@@ -4,6 +4,7 @@ from flask import Flask
 from models.base_model import db
 from flask_login import LoginManager # To handle login
 from models.user import User
+import braintree # This is to handle payment (The card information section)
 
 web_dir = os.path.join(os.path.dirname(
     os.path.abspath(__file__)), 'instagram_web')
@@ -17,6 +18,16 @@ else:
 
 login_manager = LoginManager() # To handle login
 login_manager.init_app(app)
+
+# Payment
+gateway = braintree.BraintreeGateway(
+    braintree.Configuration(
+        braintree.Environment.Sandbox,
+        merchant_id = os.environ.get("merchant_id"), # Put the keys in .env
+        public_key = os.environ.get("public_key"), # Put the keys in .env
+        private_key = os.environ.get("private_key") # Put the keys in .env
+    )
+)
 
 @app.before_request
 def before_request():
