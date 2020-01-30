@@ -31,10 +31,11 @@
       </div>
       <div style="display: flex; justify-content: flex-end;">
         {% if current_user.is_authenticated %}
+          <form action="{{ url_for('users.search') }}" method="GET" style="display: flex"><input type='text' name='user-search' class="form-control" placeholder="Search for a user" style="padding: 0px; display: inline-block" /><button type="submit" class="btn btn-primary" style="padding-top: 0px; padding-bottom: 0px; display: inline-block; margin-left: 5px;">Search</button></form>
           <a href="{{ url_for('home') }}" style="color: black; margin-left: 20px;">Home</a>
           <a href="{{ url_for('users.show', username=current_user.name) }}" style="color: black; margin-left: 20px;">My Profile</a>
           <a href="{{ url_for('users.edit', id=current_user.id) }}" style="color: black; margin-left: 20px;">Edit Profile</a>
-          <a href="{{ url_for('sessions.new') }}" style="color: black; margin-left: 20px;">Upload</a>
+          <form action="{{ url_for('users.upload', username=current_user.name) }}" method="POST"><button type="submit" style="padding: 0px; margin-left: 20px; border: none; background-color:#b3e6ff" onMouseOver="this.style.textDecoration='underline'; this.style.cursor='pointer'" onMouseOut="this.style.textDecoration='none'">Upload</button></form>
           <form action="{{ url_for('sessions.destroy') }}" method="POST"><button type="submit" style="padding: 0px; margin-left: 20px; border: none; background-color:#b3e6ff" onMouseOver="this.style.textDecoration='underline'; this.style.cursor='pointer'" onMouseOut="this.style.textDecoration='none'">Sign Out</button></form>
         {% else %}
           <a href="{{ url_for('home') }}" style="color: black; margin-left: 20px;">Home</a>

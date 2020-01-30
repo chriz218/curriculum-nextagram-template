@@ -6,6 +6,7 @@ from werkzeug.security import check_password_hash
 from models.user import User
 from flask_login import login_user, current_user, login_required, logout_user
 
+# Blueprints are required to be registered in __init__.py
 sessions_blueprint = Blueprint('sessions',
                             __name__,
                             template_folder='templates')                            
@@ -45,3 +46,5 @@ def destroy():
     logout_user()
     flash(f"Logout successful.")
     return redirect(url_for('home'))
+
+    

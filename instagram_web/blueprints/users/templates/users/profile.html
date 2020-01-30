@@ -1,9 +1,47 @@
 {% extends "_layout.html" %}
 
 {% block title %}
-  {{ current_user.name }}
+  {{ user.name }}
 {% endblock %}
 
 {% block content %}
-    <h1>{{ current_user.name }}</h1>
+<style>
+  #profilePic {
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+    border: 5px solid #b3e6ff;
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #userPic {
+    height: 200px;
+    display: flex;
+    margin: 7px;
+  }
+</style>
+
+  <div style="display: inline-block; margin: 7px;">
+    {% if user.profile_image == None %}
+      <img src="https://i.pinimg.com/originals/39/e3/6f/39e36fea0078e167237d5b1dfe1c0d59.jpg" id="profilePic">
+    {% else %}
+      <img src="{{user.profile_image_url}}" id="profilePic">  
+    {% endif %}  
+    <h1 style="text-align: center">{{ user.name }}</h1>
+    {% if user == current_user %}
+      <form action="{{ url_for('users.upload', username=current_user.name) }}" method="POST" style="display: inline-block"><button class="btn btn-primary">Upload a Photo</button></form>
+      <form action="{{ url_for('users.upload_profile_photo', username=current_user.name) }}" method="POST" style="display: inline-block"><button class="btn btn-primary">Update Profile Photo</button></form>
+    {% else %}
+      <form><button class="btn btn-primary" style="display: flex; margin-left: auto; margin-right: auto">Follow</button></form>
+    {% endif %}
+  </div>
+  <div style="display: flex; flex-wrap: wrap;">
+    {% for image in image %}
+    <div>
+      <img src="{{image.picture_url}}" id="userPic">
+      <form><button class="btn btn-primary" style="display: flex; margin-left: auto; margin-right: auto">Donate</button></form>
+    </div>  
+    {% endfor %}  
+  </div>
 {% endblock %}

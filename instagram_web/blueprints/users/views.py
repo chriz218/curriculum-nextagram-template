@@ -2,8 +2,12 @@
 from flask import Blueprint, render_template, Flask, request, flash, redirect, url_for
 from werkzeug.security import generate_password_hash # This function allows one to hash a password
 from models.user import User
+from models.picture import Picture
 from flask_login import current_user
 from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
+from instagram_web.util.helpers import *
+from config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
 
 users_blueprint = Blueprint('users',
                             __name__,
@@ -12,7 +16,23 @@ users_blueprint = Blueprint('users',
 # user profile page
 @users_blueprint.route('/<username>', methods=["GET"])
 def show(username):
-    return render_template('users/profile.html')
+    user = User.get_or_none(name = username)
+    if current_user.is_authenticated:
+        if user is not None:
+            image = user.pictures
+            return render_template('users/profile.html', user=user, image=image)
+        else: 
+            flash("This user does not exist")
+            return redirect(url_for('home'))   
+    else:
+        flash('Please sign in to view profiles')
+        return redirect(url_for('home'))    
+
+# Navbar search box
+@users_blueprint.route('/search', methods=["GET"])
+def search():
+    user_search = request.args.get('user-search').lower()
+    return redirect(url_for('users.show', username=user_search))
 
 # a page to list out all users
 @users_blueprint.route('/', methods=["GET"])
@@ -91,15 +111,83 @@ def signup_form():
    password = request.form.get('password') # Get from the input named, password, from the form in signup.html
    confirm_password = request.form.get('password-confirm') # Get from the input named, password-confirm, from the form in signup.html
 
-#    if password != confirm_password:
-#        flash("Passwords do not match")
-#        return render_template('users/signup.html')
-   
-   new_user_instance = User(name=username, email=email, password=password, confirm_password=confirm_password) # Create an instance (row) for Users
+##################
+   if password != confirm_password:
+       flash("Passwords do not match")
+       return render_template('users/signup.html')
+##################
+#        
+#    new_user_instance = User(name=username, email=email, password=password, confirm_password=confirm_password) # Create an instance (row) for Users
+   new_user_instance = User(name=username, email=email, password=password) # Create an instance (row) for Users
    if new_user_instance.save():
       flash(f"Sign up successful! Your username is {username}.")
       return redirect(url_for('users.sign_up'))
    else:    
       for i in new_user_instance.errors:
           flash(i)     
-      return render_template('users/signup.html',errors=new_user_instance.errors)   
+      return render_template('users/signup.html',errors=new_user_instance.errors)  
+
+## Profile Photo
+@users_blueprint.route("/<username>/upload_profile_photo", methods=["POST"])
+def upload_profile_photo(username):
+    user = User.get_or_none(name = username)
+    return render_template('users/uploadprofilepic.html', user=user)
+
+@users_blueprint.route("/<username>/upload_profile_photo_file", methods=["POST"])
+def upload_profile_photo_file(username):    
+	# A
+    if "user_profile_photo_file" not in request.files:
+        return "No user_file key in request.files"
+
+	# B
+    file = request.files["user_profile_photo_file"]
+
+	# C.
+    if file.filename == "":
+        return "Please select a file"
+
+	# D.
+    if file and allowed_file(file.filename):
+        file.filename = secure_filename(file.filename)
+        output = upload_file_to_s3(file, S3_BUCKET)
+        query = User.update(profile_image = str(output)).where(User.id == current_user.id)
+        if query.execute():
+            return redirect(url_for('users.show', username=current_user.name))
+        else:
+            return redirect(url_for('users.upload_profile_photo'))      
+
+    else:
+        return redirect(url_for('users.upload_profile_photo'))     
+
+## Photos
+@users_blueprint.route("/<username>/upload", methods=["POST"])
+def upload(username):
+    user = User.get_or_none(name = username)
+    return render_template('users/upload.html', user=user)
+
+@users_blueprint.route("/<username>/upload_file", methods=["POST"])
+def upload_file(username):    
+	# A
+    if "user_file" not in request.files:
+        return "No user_file key in request.files"
+
+	# B
+    file = request.files["user_file"]
+
+	# C.
+    if file.filename == "":
+        return "Please select a file"
+
+	# D.
+    if file and allowed_file(file.filename):
+        file.filename = secure_filename(file.filename)
+        output = upload_file_to_s3(file, S3_BUCKET)
+        picture = Picture(picture_name=str(output),user=current_user.id)
+        if picture.save():
+            flash('Photo successfully uploaded')
+            return redirect(url_for('users.show', username=current_user.name))
+        else:
+            return redirect(url_for('users.upload_file'))    
+
+    else:
+        return redirect(url_for('users.upload'))           

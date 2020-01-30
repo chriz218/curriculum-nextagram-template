@@ -10,6 +10,7 @@ from models.user import User
 assets = Environment(app)
 assets.register(bundles)
 
+## Blueprints ##
 app.register_blueprint(users_blueprint, url_prefix="/users")
 app.register_blueprint(sessions_blueprint)
 

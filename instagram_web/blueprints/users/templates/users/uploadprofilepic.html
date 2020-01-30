@@ -1,0 +1,17 @@
+{% extends "_layout.html" %}
+
+{% block title %}
+  Upload Profile Photo
+{% endblock %}
+
+{% block content %}
+<form action="{{ url_for('users.upload_profile_photo_file', username=current_user.name) }}" method="POST" enctype="multipart/form-data"> <!-- images are multipart, enctype multipart required for images -->
+  <h1>Upload New Profile Photo: {{ user.name }}</h1>
+  <div class="form-group">
+    <label>Upload a New Profile Photo:</label>
+    <input type='file' name="user_profile_photo_file" class="form-control" />
+  </div>
+
+  <button type="submit" class="btn btn-primary">Upload</button>
+</form>
+{% endblock %}
