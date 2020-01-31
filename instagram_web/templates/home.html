@@ -9,7 +9,7 @@
 
 {% block content %}
   {% if current_user.is_authenticated %}
-    <h1>Hello, {{ current_user.name }}. Welcome to Nextagram!</h1>
+    <h1>Hello, {{ current_user.name.capitalize() }}. Welcome to Nextagram!</h1>
   {% else %}
     <h1>Welcome to Nextagram!</h1>
   {% endif %}  

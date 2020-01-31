@@ -8,6 +8,7 @@ from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 from instagram_web.util.helpers import *
 from config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
+from models.follow import Follow
 
 users_blueprint = Blueprint('users',
                             __name__,
@@ -19,8 +20,10 @@ def show(username):
     user = User.get_or_none(name = username)
     if current_user.is_authenticated:
         if user is not None:
-            images = user.pictures
-            return render_template('users/profile.html', user=user, images=images)
+            # followers = user.followers            
+            follower = Follow.get_or_none(follower_id = current_user.id, followed_user_id = user.id) 
+            images = user.pictures # Utilizing the backref
+            return render_template('users/profile.html', user=user, images=images, follower=follower)
         else: 
             flash("This user does not exist")
             return redirect(url_for('home'))   
@@ -45,7 +48,7 @@ def edit(id):
     return render_template('users/profileedit.html')
 
 # form action for profile edit
-@users_blueprint.route('/<id>', methods=['POST'])
+@users_blueprint.route('/<id>/editprofile', methods=['POST'])####
 def update(id):
     user = User.get_by_id(id)
     new_username = request.form.get('new-username').lower()
@@ -190,4 +193,53 @@ def upload_file(username):
             return redirect(url_for('users.upload_file'))    
 
     else:
-        return redirect(url_for('users.upload'))           
+        return redirect(url_for('users.upload'))      
+
+# Follow
+@users_blueprint.route("/<id>/follow", methods=["POST"])
+def follow(id):
+    user = User.get_by_id(id)
+    new_follow_instance = Follow(follower_id=current_user.id, followed_user_id=user.id)
+    if new_follow_instance.save():
+        flash("Followed successfully")
+        return redirect(url_for('users.show', username=user.name))
+    else:
+        flash("Something went wrong")
+        return redirect(url_for('users.show', username=user.name))
+
+@users_blueprint.route("/<id>/unfollow", methods=["POST"])
+def unfollow(id):
+    user = User.get_by_id(id)
+    unfollow = Follow.get_or_none(follower_id = current_user.id, followed_user_id = user.id) 
+    if unfollow.delete_instance():
+        flash("Unfollowed successfully")
+        return redirect(url_for('users.show', username=user.name))
+    else:
+        flash("Something went wrong")
+        return redirect(url_for('users.show', username=user.name))  
+
+# Privacy
+@users_blueprint.route("/<id>/private", methods=["POST"])
+def private(id):
+    user = User.get_by_id(id)
+    make_private = User.update(privacy = True).where(User.id == current_user.id)
+    if make_private.execute():
+        flash("Profile is now private")
+        return redirect(url_for('users.show', username=user.name))
+    else: 
+        flash("Something went wrong")
+        return redirect(url_for('users.show', username=user.name)) 
+
+@users_blueprint.route("/<id>/public", methods=["POST"])
+def public(id):
+    user = User.get_by_id(id)    
+    make_public = User.update(privacy = False).where(User.id == current_user.id)
+    if make_public.execute():
+        flash("Profile is now public")
+        return redirect(url_for('users.show', username=user.name))
+    else: 
+        flash("Something went wrong")
+        return redirect(url_for('users.show', username=user.name)) 
+
+
+

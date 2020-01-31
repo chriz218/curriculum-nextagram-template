@@ -1,11 +1,14 @@
 # PAYMENT views 
 
+import os
 from flask import Blueprint, render_template, Flask, request, flash, redirect, url_for
 from app import gateway
 from models.user import User
 from models.picture import Picture
 from models.payment import Payment
 from flask_login import current_user
+from sendgrid import SendGridAPIClient # For sending emails
+from sendgrid.helpers.mail import Mail # For sending emails
 
 # Blueprints are required to be registered in __init__.py
 payment_blueprint = Blueprint('payment',
@@ -37,7 +40,21 @@ def create_purchase(picture_id):
         new_payment_instance.save()
         picture = Picture.get_by_id(picture_id)
         user = User.get_by_id(picture.user_id)
-        flash('Payment successful')
+
+        message = Mail(
+            from_email=current_user.email,
+            to_emails=user.email,
+            subject=f"Nextagram: New Donation from {current_user.name.capitalize()}",
+            html_content=f"<p>Dear {user.name.capitalize()},</p><br><p>{current_user.name.capitalize()} has just donated ${donation_amount} to you!</p><br><p>{current_user.name.capitalize()}\'s message: {donation_message}</p><br><p>With love,</p><br><p>Nextagram</p>")
+        try:
+            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+            response = sg.send(message)
+            print(response.status_code)
+            print(response.body)
+            print(response.headers)
+            flash('Payment successful')
+        except Exception as e:
+            print(str(e))
         return redirect(url_for('users.show', username=user.name))
     else:
         flash('Payment unsuccessful. Please try again.')

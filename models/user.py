@@ -11,6 +11,7 @@ class User(BaseModel, UserMixin): # User is a class that inherits from classes, 
     email = pw.CharField(unique=True)
     password = pw.CharField(unique=False)
     profile_image = pw.CharField(null=True)
+    privacy = pw.BooleanField(default=False)
 
     def validate(self):
         duplicate_username = User.get_or_none(User.name == self.name)

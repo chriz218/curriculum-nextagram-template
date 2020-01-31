@@ -6,7 +6,7 @@
 
 {% block content %}
 <form action="{{ url_for('users.update', id=current_user.id) }}" method="POST">
-    <h1>Edit Profile: {{ current_user.name }}</h1>
+    <h1>Edit Profile: {{ current_user.name.capitalize() }}</h1>
     <p>Leave field empty if you do not wish to change it</p>
     <div class="form-group">
       <label for="new-username">New Username:</label>

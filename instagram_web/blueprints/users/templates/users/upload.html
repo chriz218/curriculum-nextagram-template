@@ -6,7 +6,7 @@
 
 {% block content %}
 <form action="{{ url_for('users.upload_file', username=current_user.name) }}" method="POST" enctype="multipart/form-data"> <!-- images are multipart -->
-  <h1>Upload a Photo: {{ user.name }}</h1>
+  <h1>Upload a Photo: {{ user.name.capitalize() }}</h1>
   <div class="form-group">
     <label>Upload a Photo:</label>
     <input type='file' name="user_file" class="form-control" />

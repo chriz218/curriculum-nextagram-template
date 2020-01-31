@@ -1,5 +1,5 @@
 # Main __init__
-from app import app
+from app import app, oauth
 from flask import Flask, render_template, request, flash, redirect, url_for
 from instagram_web.blueprints.users.views import users_blueprint
 from instagram_web.blueprints.sessions.views import sessions_blueprint
@@ -7,6 +7,10 @@ from instagram_web.blueprints.payment.views import payment_blueprint
 from flask_assets import Environment, Bundle
 from .util.assets import bundles
 from models.user import User
+import os
+import config
+
+oauth.init_app(app)
 
 assets = Environment(app)
 assets.register(bundles)
