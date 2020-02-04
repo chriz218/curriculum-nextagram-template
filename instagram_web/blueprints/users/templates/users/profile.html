@@ -11,9 +11,6 @@
     width: 200px;
     border-radius: 50%;
     border: 5px solid #b3e6ff;
-    /* display: flex; */
-    /* margin-left: auto;
-    margin-right: auto; */
   }
   #userPic {
     height: 200px;
@@ -28,22 +25,35 @@
       {% else %}
         <img src="{{user.profile_image_url}}" id="profilePic">  
       {% endif %}  
-      <h1 style="text-align: center">{{ user.name.capitalize() }}</h1>
+      <h1 style="text-align: center; margin-bottom: 2px;">{{ user.name.capitalize() }}</h1>
+      <h6 style="display:inline-block">Followers: {{number_of_followers}}</h6>
+      <h6 style="display: inline-block; margin-left: 20px">Following: {{number_of_followings}}</h6>
+      <div>
       {% if user == current_user %}
-        <form action="{{ url_for('users.upload', username=current_user.name) }}" method="POST" style="display: inline-block"><button class="btn btn-primary">Upload a Photo</button></form>
-        <form action="{{ url_for('users.upload_profile_photo', username=current_user.name) }}" method="POST" style="display: inline-block"><button class="btn btn-primary">Update Profile Photo</button></form>
+        <form action="{{ url_for('users.upload', username=current_user.name) }}" method="POST" style="display: inline-block; margin-bottom: 5px"><button class="btn btn-primary">Upload a Photo</button></form>
+        <form action="{{ url_for('users.upload_profile_photo', username=current_user.name) }}" method="POST" style="display: inline-block; margin-bottom: 5px"><button class="btn btn-primary">Update Profile Photo</button></form>
         {% if user.privacy == False %}
-          <form action="{{ url_for('users.private', id=current_user.id) }}" method="POST" style="display: inline-block"><button class="btn btn-primary">Make Profile Private</button></form>
+          <form action="{{ url_for('users.private', id=current_user.id) }}" method="POST" style="display: inline-block; margin-bottom: 5px"><button class="btn btn-primary">Make Profile Private</button></form>
         {% else %}  
-          <form action="{{ url_for('users.public', id=current_user.id) }}" method="POST" style="display: inline-block"><button class="btn btn-primary">Make Profile Public</button></form>
+          <form action="{{ url_for('users.public', id=current_user.id) }}" method="POST" style="display: inline-block; margin-bottom: 5px"><button class="btn btn-primary">Make Profile Public</button></form>
         {% endif %}
+          <form action="{{ url_for('users.follower', username=user.name) }}" method="POST" style="display: inline-block; margin-bottom: 5px"><button class="btn btn-primary">Followers</button></form>
+          <form action="{{ url_for('users.following', username=user.name) }}" method="POST" style="display: inline-block; margin-bottom: 5px"><button class="btn btn-primary">Following</button></form>
+          <form action="{{ url_for('users.follow_request', username=current_user.name) }}" method="POST" style="display: inline-block; margin-bottom: 5px"><button class="btn btn-primary">Follow Requests</button></form>
       {% else %}
         {% if follower %}
-          <form action="{{ url_for('users.unfollow', id=user.id) }}" method="POST"><button class="btn btn-primary" style="display: flex; margin-left: auto; margin-right: auto">Unfollow</button></form>
+          <form action="{{ url_for('users.follower', username=user.name) }}" method="POST" style="display: inline-block; margin-bottom: 5px"><button class="btn btn-primary">Followers</button></form>
+          <form action="{{ url_for('users.following', username=user.name) }}" method="POST" style="display: inline-block; margin-bottom: 5px"><button class="btn btn-primary">Following</button></form>
+          <form action="{{ url_for('users.unfollow', id=user.id) }}" method="POST" style="display: inline-block; margin-bottom: 5px"><button class="btn btn-danger">Unfollow</button></form>
         {% else %}
-          <form action="{{ url_for('users.follow', id=user.id) }}" method="POST"><button class="btn btn-primary" style="display: flex; margin-left: auto; margin-right: auto">Follow</button></form>
+          {% if follow_requester %}
+            <form action="{{ url_for('users.follow_request_cancel', id=user.id) }}" method="POST"><button class="btn btn-primary" style="display: flex; margin-left: auto; margin-right: auto">Cancel Follow Request</button></form>
+          {% else %}  
+            <form action="{{ url_for('users.follow_request_send', id=user.id) }}" method="POST"><button class="btn btn-primary" style="display: flex; margin-left: auto; margin-right: auto">Follow</button></form>
+          {% endif %}  
         {% endif %}
       {% endif %}
+      </div>
     </div>
   </div>
 
@@ -64,4 +74,4 @@
       <h3>{{user.name.capitalize()}}'s profile is private. Follow {{user.name.capitalize()}} to view photos.</h3>
     </div> 
   {% endif %}  
-  {% endblock %}
+{% endblock %}

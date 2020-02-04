@@ -9,8 +9,8 @@
 
 {% block content %}
   {% if current_user.is_authenticated %}
-    <h1>Hello, {{ current_user.name.capitalize() }}. Welcome to Nextagram!</h1>
+    <h1 style="width: 100vw; text-align: center; position: absolute; top: 50vh; left: 50vw; transform: translate(-50%,-50%);">Hello, {{ current_user.name.capitalize() }}. Welcome to Nextagram!</h1>
   {% else %}
-    <h1>Welcome to Nextagram!</h1>
+    <h1 style="width:100vw; text-align:center; position: absolute; top: 50vh; left: 50vw; transform: translate(-50%,-50%);">Welcome to Nextagram!</h1>
   {% endif %}  
 {% endblock %}

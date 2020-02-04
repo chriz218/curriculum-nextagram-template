@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 from instagram_web.util.helpers import *
 from config import S3_KEY, S3_SECRET, S3_BUCKET, S3_LOCATION
 from models.follow import Follow
+from models.follow_request import Follow_Request
 
 users_blueprint = Blueprint('users',
                             __name__,
@@ -22,8 +23,11 @@ def show(username):
         if user is not None:
             # followers = user.followers            
             follower = Follow.get_or_none(follower_id = current_user.id, followed_user_id = user.id) 
+            follow_requester = Follow_Request.get_or_none(follow_requester_id = current_user.id, follow_requested_user_id = user.id)
             images = user.pictures # Utilizing the backref
-            return render_template('users/profile.html', user=user, images=images, follower=follower)
+            number_of_followers = len(user.followers)
+            number_of_followings = len(user.followings)
+            return render_template('users/profile.html', user=user, images=images, follower=follower, follow_requester=follow_requester, number_of_followers=number_of_followers, number_of_followings=number_of_followings)
         else: 
             flash("This user does not exist")
             return redirect(url_for('home'))   
@@ -199,14 +203,16 @@ def upload_file(username):
 @users_blueprint.route("/<id>/follow", methods=["POST"])
 def follow(id):
     user = User.get_by_id(id)
-    new_follow_instance = Follow(follower_id=current_user.id, followed_user_id=user.id)
+    # new_follow_instance = Follow(follower_id=current_user.id, followed_user_id=user.id) # Need to swap
+    new_follow_instance = Follow(follower_id=user.id, followed_user_id=current_user.id) # Need to swap
     if new_follow_instance.save():
-        flash("Followed successfully")
-        return redirect(url_for('users.show', username=user.name))
+        flash("Follow request accepted successfully")
+        return redirect(url_for('users.follow_request', username=current_user.name), code=307) 
     else:
         flash("Something went wrong")
-        return redirect(url_for('users.show', username=user.name))
+        return redirect(url_for('users.follow_request', username=current_user.name), code=307) 
 
+# Unfollow
 @users_blueprint.route("/<id>/unfollow", methods=["POST"])
 def unfollow(id):
     user = User.get_by_id(id)
@@ -217,6 +223,78 @@ def unfollow(id):
     else:
         flash("Something went wrong")
         return redirect(url_for('users.show', username=user.name))  
+
+
+# Follow Request Page #
+@users_blueprint.route("/<username>/follow_request", methods=["POST"])
+def follow_request(username):
+    follow_request_list = current_user.follow_requesters
+    # follow_request_list = Follow_Request.get_or_none(follow_requested_user_id=current_user.id)
+    return render_template('users/followrequest.html', follow_request_list=follow_request_list, User=User)
+
+# Follow Request (Click on Follow button to request to follow)
+@users_blueprint.route("/<id>/follow_request_send", methods=["POST"])
+def follow_request_send(id):
+    user = User.get_by_id(id)
+    new_follow_request_instance = Follow_Request(follow_requester_id = current_user.id, follow_requested_user_id = user.id)
+    if new_follow_request_instance.save():
+        flash("Follow request submitted successfully")
+        return redirect(url_for('users.show', username=user.name))
+    else:
+        flash("Something went wrong")
+        return redirect(url_for('users.show', username=user.name))  
+
+# Follow Request Accept (Click on Accept button to accept follow request)
+@users_blueprint.route("/<id>/follow_request_accept", methods=["POST"])
+def follow_request_accept(id):
+    user = User.get_by_id(id)
+    # follow_accept = Follow_Request.get_or_none(follow_requester_id = current_user.id, follow_requested_user_id = user.id) # Need to swap
+    follow_accept = Follow_Request.get_or_none(follow_requester_id = user.id, follow_requested_user_id = current_user.id) # Need to swap
+    if follow_accept.delete_instance():
+        return redirect(url_for('users.follow', id=user.id), code=307)
+        # return redirect(url_for('users.follow', id=current_user.id)) #########
+    else:
+        flash("Something went wrong")
+        return redirect(url_for('users.follow_request', username=current_user.name), code=307)    
+
+# Follow Request Delete (Click on Delete button to delete follow request)
+@users_blueprint.route("/<id>/follow_request_delete", methods=["POST"])
+def follow_request_delete(id):
+    user = User.get_by_id(id)
+    # follow_delete = Follow_Request.get_or_none(follow_requester_id = current_user.id, follow_requested_user_id = user.id) # Need to swap
+    follow_delete = Follow_Request.get_or_none(follow_requester_id = user.id, follow_requested_user_id = current_user.id) # Need to swap
+    if follow_delete.delete_instance():
+        flash("Follow request deleted successfully")
+        return redirect(url_for('users.follow_request', username=current_user.name), code=307)
+    else: 
+        flash("Something went wrong")
+        return redirect(url_for('users.follow_request', username=current_user.name), code=307)
+
+# Follow Request Cancel (Click on Cancel button to cancel follow request)
+@users_blueprint.route("/<id>/follow_request_cancel", methods=["POST"])
+def follow_request_cancel(id):
+    user = User.get_by_id(id)
+    follow_cancel = Follow_Request.get_or_none(follow_requester_id = current_user.id, follow_requested_user_id = user.id)
+    if follow_cancel.delete_instance():
+        flash("Follow request cancelled successfully")
+        return redirect(url_for('users.show', username=user.name))
+    else: 
+        flash("Something went wrong")
+        return redirect(url_for('users.show', username=user.name))  
+
+# Following Page #
+@users_blueprint.route("/<username>/following", methods=["POST"])
+def following(username):
+    user = User.get_or_none(name = username)
+    following_list = user.followings
+    return render_template('users/following.html', following_list=following_list, User=User, user=user)
+
+# Follower Page #
+@users_blueprint.route("/<username>/follower", methods=["POST"])
+def follower(username):
+    user = User.get_or_none(name = username)
+    follower_list = user.followers
+    return render_template('users/follower.html', follower_list=follower_list, User=User, user=user)    
 
 # Privacy
 @users_blueprint.route("/<id>/private", methods=["POST"])
@@ -240,6 +318,3 @@ def public(id):
     else: 
         flash("Something went wrong")
         return redirect(url_for('users.show', username=user.name)) 
-
-
-

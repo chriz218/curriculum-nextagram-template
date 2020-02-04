@@ -35,7 +35,7 @@ def create():
    if result == True:
        flash(f"Login successful.")
        login_user(user)
-       return redirect(url_for('home'))
+       return redirect(url_for('home', user=user))
    else:
        flash(f"Invalid username or password.")    
        return render_template('/sessions/login.html') 

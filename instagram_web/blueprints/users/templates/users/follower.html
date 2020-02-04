@@ -1,0 +1,33 @@
+{% extends "_layout.html" %}
+
+{% block title %}
+  {{ user.name.capitalize() }}: Followers
+{% endblock %}
+
+{% block content %}
+<style>
+    #profilePic {
+      height: 200px;
+      width: 200px;
+      border-radius: 50%;
+      border: 5px solid #b3e6ff;
+      display: inline-block
+    }
+</style>
+
+<h1>{{ user.name.capitalize() }}: Followers</h1>
+{% for follower_list_item in follower_list %}
+<div style="display: flex;">
+    <div style="display: flex; flex-direction: column; text-align: center; margin: 7px;">
+        <h2><a href="{{ url_for('users.show', username=User.get_by_id(follower_list_item.follower_id).name) }}">{{ User.get_by_id(follower_list_item.follower_id).name.capitalize() }}</a></h2>
+        {% if User.get_by_id(follower_list_item.follower_id).profile_image == None %}
+            <img src="https://firstbucketnext.s3.amazonaws.com/1580395073.538688SampleNSymbol.jpg" id="profilePic">
+        {% else %}
+            <img src="{{User.get_by_id(follower_list_item.follower_id).profile_image_url}}" id="profilePic"> 
+        {% endif %}  
+    </div>    
+</div>
+
+{% endfor %}
+
+{% endblock %}
